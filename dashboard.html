@@ -3744,7 +3744,7 @@
 
         .docs-cert-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 3px;
             align-items: center;
         }
@@ -10603,7 +10603,7 @@ body{background:
                             type="search"
                             id="docs-search"
                             class="docs-search"
-                            placeholder="Caută după nume, callsign, grad, ID intern sau Discord..."
+                            placeholder="Caută după nume, callsign, grad, ID sau Discord..."
                         >
 
                         <span
@@ -10611,8 +10611,8 @@ body{background:
                             class="personnel-summary"
                             style="margin:0;"
                         >
-                            <span>SLOTURI D-01 — D-99</span>
-                            <strong>99</strong>
+                            <span>SLOTURI POLIȚIA ROMÂNĂ</span>
+                            <strong>123</strong>
                         </span>
 
                     </div>
@@ -10672,7 +10672,7 @@ body{background:
                                     <th style="width:65px;">ACTIV</th>
                                     <th style="width:112px;">ULTIMA PROMOVARE</th>
                                     <th style="width:112px;">INTRARE DEPARTAMENT</th>
-                                    <th style="width:150px;">CERTIFICĂRI<br>FTP • RADIO • AIR • DCCO</th>
+                                    <th style="width:150px;">CERTIFICĂRI<br>FTP • RADIO • AC • HS • AIR • MOTO</th>
                                     <th style="width:150px;">ROLURI</th>
                                     <th style="width:155px;">DISCORD</th>
                                     <th style="width:125px;">ACȚIUNI</th>
@@ -10698,7 +10698,7 @@ body{background:
 
 
                 <div class="docs-help">
-                    DOCS este vizibil tuturor membrilor autentificați. Modificarea, sincronizarea și ștergerea datelor sunt disponibile doar pentru COORDONATOR+.
+                    DOCS este vizibil tuturor membrilor autentificați. SINCRONIZEAZĂ PERSONAL citește membrii Poliției direct din Discord, îi așază după callsign și extrage automat ID-ul numeric din nickname. Modificarea, sincronizarea și ștergerea datelor sunt disponibile doar pentru COMISAR ȘEF+.
                 </div>
 
                 <div
@@ -14715,6 +14715,26 @@ const query =
                                             >
                                         </label>
 
+                                        <label class="docs-cert-item" title="AC">
+                                            <input
+                                                type="checkbox"
+                                                class="docs-check"
+                                                data-field="certAc"
+                                                ${checked(row.certAc)}
+                                                ${disabled}
+                                            >
+                                        </label>
+
+                                        <label class="docs-cert-item" title="HS">
+                                            <input
+                                                type="checkbox"
+                                                class="docs-check"
+                                                data-field="certHs"
+                                                ${checked(row.certHs)}
+                                                ${disabled}
+                                            >
+                                        </label>
+
                                         <label class="docs-cert-item" title="AIR">
                                             <input
                                                 type="checkbox"
@@ -14725,12 +14745,12 @@ const query =
                                             >
                                         </label>
 
-                                        <label class="docs-cert-item" title="DCCO">
+                                        <label class="docs-cert-item" title="MOTO">
                                             <input
                                                 type="checkbox"
                                                 class="docs-check"
-                                                data-field="certDcco"
-                                                ${checked(row.certDcco)}
+                                                data-field="certMoto"
+                                                ${checked(row.certMoto)}
                                                 ${disabled}
                                             >
                                         </label>
@@ -14810,14 +14830,24 @@ const query =
                     get("certRadio")?.checked
                 ),
 
+            certAc:
+                Boolean(
+                    get("certAc")?.checked
+                ),
+
+            certHs:
+                Boolean(
+                    get("certHs")?.checked
+                ),
+
             certAir:
                 Boolean(
                     get("certAir")?.checked
                 ),
 
-            certDcco:
+            certMoto:
                 Boolean(
-                    get("certDcco")?.checked
+                    get("certMoto")?.checked
                 ),
 
             roles:
@@ -15290,7 +15320,7 @@ const query =
                     }
 
                     docsSetMessage(
-                        `Sincronizare finalizată: schema D-01 — D-99 și gradele aferente au fost actualizate. ${Number(data.assigned || 0)} membri au fost asociați pe callsign.`,
+                        `Sincronizare finalizată: ${Number(data.assigned || 0)} membri ai Poliției au fost așezați automat după callsign. ID-ul din nickname a fost preluat automat. Fără callsign: ${Number(data.skippedNoCallsign || 0)} • callsign invalid: ${Number(data.skippedInvalidCallsign || 0)} • duplicate: ${Number(data.duplicateCallsign || 0)}.`,
                         "success"
                     );
 
