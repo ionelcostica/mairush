@@ -1,1 +1,463 @@
 
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poliția Română | Rush România</title>
+<style>
+:root{
+  --bg:#050913;
+  --bg2:#0a1220;
+  --panel:#0d1727;
+  --panel2:#101d31;
+  --line:rgba(255,255,255,.08);
+  --text:#f3f7fb;
+  --muted:#8ea0b8;
+  --blue:#2f7df4;
+  --blue2:#63a6ff;
+  --cyan:#71d7ff;
+  --red:#ef4d5a;
+  --green:#41d18e;
+  --shadow:0 30px 80px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(47,125,244,.12),transparent 28%),
+    radial-gradient(circle at 100% 20%,rgba(239,77,90,.07),transparent 20%),
+    linear-gradient(180deg,#050913 0%,#07111d 50%,#050913 100%);
+  overflow-x:hidden;
+}
+a{color:inherit}
+button,input{font:inherit}
+
+/* TOP BAR */
+.topbar{
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  background:#040811;
+  color:#6f829c;
+  font-size:10px;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+.topbar b{color:var(--cyan);margin:0 7px}
+
+/* NAV */
+.nav-wrap{
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(18px);
+  background:rgba(5,9,19,.80);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.navbar{
+  width:min(1420px,calc(100% - 40px));
+  height:78px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:28px;
+}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(47,125,244,.28))}
+.brand-text strong{display:block;font-size:16px;letter-spacing:1.6px}
+.brand-text span{display:block;margin-top:3px;font-size:9px;color:var(--blue2);letter-spacing:1.4px;font-weight:800}
+.nav-links{display:flex;justify-content:center;gap:6px}
+.nav-links a{
+  text-decoration:none;
+  color:#91a2ba;
+  font-size:11px;
+  font-weight:700;
+  padding:11px 13px;
+  border-radius:8px;
+  transition:.2s ease;
+}
+.nav-links a:hover{color:#fff;background:rgba(255,255,255,.045)}
+.login-btn,.logout-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;padding:0 16px;
+  border-radius:9px;text-decoration:none;
+  font-size:10px;font-weight:900;letter-spacing:.8px;
+  border:1px solid rgba(99,166,255,.35);
+  color:#d9ebff;
+  background:linear-gradient(180deg,rgba(47,125,244,.15),rgba(47,125,244,.06));
+}
+.user-menu{display:flex;align-items:center;gap:10px}
+.user-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(99,166,255,.5)}
+.user-info strong{display:block;font-size:10px}
+.user-info span{display:block;color:var(--blue2);font-size:8px;margin-top:2px}
+.logout-btn{min-height:36px;color:#9fb0c5;border-color:var(--line);background:rgba(255,255,255,.02)}
+
+/* HERO - COMPLET DIFERIT */
+.hero-shell{width:min(1420px,calc(100% - 40px));margin:34px auto 0}
+.hero{
+  min-height:690px;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);
+  border:1px solid var(--line);
+  border-radius:28px;
+  overflow:hidden;
+  background:#08111e;
+  box-shadow:var(--shadow);
+}
+.hero-left{
+  position:relative;
+  padding:76px 64px 56px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  background:
+    linear-gradient(135deg,rgba(47,125,244,.07),transparent 42%),
+    linear-gradient(180deg,#0b1524 0%,#09111c 100%);
+}
+.hero-left::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(180deg,var(--blue),var(--cyan));
+}
+.eyebrow{display:flex;align-items:center;gap:10px;color:var(--cyan);font-size:10px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+.eyebrow::before{content:"";width:28px;height:2px;background:var(--cyan)}
+.hero h1{margin:24px 0 18px;font-size:clamp(58px,7vw,104px);line-height:.92;letter-spacing:-4px;text-transform:uppercase}
+.hero h1 span{display:block}
+.hero h1 .outline{color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.5)}
+.hero p{max-width:620px;margin:0;color:#92a5bc;font-size:15px;line-height:1.8}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.primary-btn,.ghost-btn{
+  min-height:50px;padding:0 22px;border-radius:10px;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  font-size:10px;font-weight:900;letter-spacing:.8px;transition:.2s ease;
+}
+.primary-btn{background:linear-gradient(135deg,#2f7df4,#58a7ff);color:white;box-shadow:0 14px 38px rgba(47,125,244,.26)}
+.ghost-btn{border:1px solid var(--line);color:#d8e2ed;background:rgba(255,255,255,.025)}
+.primary-btn:hover,.ghost-btn:hover{transform:translateY(-2px)}
+.hero-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:42px}
+.hero-mini .mini{padding:14px 15px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
+.hero-mini strong{display:block;font-size:12px}
+.hero-mini span{display:block;margin-top:4px;font-size:9px;color:#6f8299}
+
+.hero-right{position:relative;min-height:690px;background:#0b1320;overflow:hidden}
+.hero-right::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,17,30,.72) 0%,rgba(8,17,30,.16) 32%,rgba(8,17,30,.12) 100%),linear-gradient(180deg,transparent 55%,rgba(4,8,14,.86) 100%)}
+.hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.03)}
+.lightbar{position:absolute;left:24px;right:24px;top:24px;height:5px;z-index:5;display:grid;grid-template-columns:1fr 1fr;gap:8px;opacity:.9}
+.lightbar span:first-child{background:linear-gradient(90deg,transparent,var(--blue),transparent);box-shadow:0 0 26px rgba(47,125,244,.8)}
+.lightbar span:last-child{background:linear-gradient(90deg,transparent,var(--red),transparent);box-shadow:0 0 26px rgba(239,77,90,.7)}
+.hero-badge-card{
+  position:absolute;z-index:6;left:28px;bottom:28px;right:28px;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:18px 20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;
+  background:rgba(4,9,17,.74);backdrop-filter:blur(15px);
+}
+.hero-badge-card .left{display:flex;align-items:center;gap:13px}
+.hero-badge-card img{width:56px;height:56px;object-fit:contain}
+.hero-badge-card strong{display:block;font-size:13px;letter-spacing:.6px}
+.hero-badge-card small{display:block;color:#8396ae;margin-top:4px}
+.status-pill{display:inline-flex;align-items:center;gap:7px;color:#9ff1c9;font-size:9px;font-weight:800}
+.status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+
+/* OPS STRIP */
+.ops-strip{width:min(1420px,calc(100% - 40px));margin:18px auto 0;display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:12px}
+.ops-item{min-height:102px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#0c1726,#09121f);padding:20px;display:flex;flex-direction:column;justify-content:center}
+.ops-item.featured{background:linear-gradient(135deg,rgba(47,125,244,.17),rgba(10,18,32,.96))}
+.ops-item span{color:#71849c;font-size:9px;letter-spacing:.8px;text-transform:uppercase}
+.ops-item strong{font-size:22px;margin-top:7px}
+.ops-item small{color:#8193a9;margin-top:5px;font-size:9px}
+
+/* MODULES */
+.section{width:min(1420px,calc(100% - 40px));margin:92px auto 0}
+.section-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:28px;margin-bottom:24px}
+.section-head .kicker{color:var(--blue2);font-size:9px;font-weight:900;letter-spacing:1.4px}
+.section-head h2{margin:8px 0 0;font-size:36px}
+.section-head p{max-width:520px;margin:0;color:#778ba3;font-size:12px;line-height:1.7}
+.module-grid{display:grid;grid-template-columns:1.25fr .75fr .75fr;grid-auto-rows:250px;gap:14px}
+.module{
+  position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;
+  padding:24px;background:linear-gradient(180deg,#0e1a2b,#0a1320);text-decoration:none;
+  transition:.22s ease;
+}
+.module:hover{transform:translateY(-4px);border-color:rgba(99,166,255,.3);box-shadow:0 24px 54px rgba(0,0,0,.26)}
+.module.big{grid-row:span 2;background:linear-gradient(160deg,rgba(47,125,244,.15),rgba(10,19,32,.96) 46%)}
+.module .icon{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:rgba(47,125,244,.12);border:1px solid rgba(99,166,255,.18);font-size:20px}
+.module h3{margin:22px 0 8px;font-size:20px}
+.module p{margin:0;max-width:390px;color:#7f91a7;font-size:11px;line-height:1.7}
+.module .arrow{position:absolute;right:22px;bottom:20px;font-size:20px;color:var(--blue2)}
+.module.big::after{content:"POLIȚIA";position:absolute;right:-18px;bottom:-22px;font-size:76px;font-weight:1000;color:rgba(255,255,255,.025);letter-spacing:4px}
+
+/* VISUAL STORY */
+.story{
+  width:min(1420px,calc(100% - 40px));margin:92px auto 0;
+  display:grid;grid-template-columns:1fr 1fr;min-height:430px;
+  border:1px solid var(--line);border-radius:22px;overflow:hidden;background:#0a1320;
+}
+.story-visual{position:relative;min-height:430px}
+.story-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.story-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(10,19,32,.52))}
+.story-copy{padding:54px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(180deg,#0d1828,#09131f)}
+.story-copy span{color:var(--cyan);font-size:9px;font-weight:900;letter-spacing:1.4px}
+.story-copy h2{margin:12px 0 15px;font-size:34px}
+.story-copy p{margin:0;color:#8092a8;font-size:12px;line-height:1.8}
+.story-points{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.story-points div{padding:13px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02);font-size:10px;color:#c8d3df}
+
+/* CTA */
+.cta{width:min(1420px,calc(100% - 40px));margin:70px auto 80px;padding:30px 32px;border:1px solid rgba(99,166,255,.18);border-radius:18px;background:linear-gradient(135deg,rgba(47,125,244,.15),rgba(11,20,34,.98));display:flex;align-items:center;justify-content:space-between;gap:20px}
+.cta h3{margin:0;font-size:24px}.cta p{margin:7px 0 0;color:#7f91a7;font-size:11px}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(255,255,255,.06);background:#040811}
+.footer-inner{width:min(1420px,calc(100% - 40px));margin:auto;padding:34px 0;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.footer-brand{display:flex;align-items:center;gap:12px}.footer-brand img{width:44px;height:44px;object-fit:contain}
+.footer-brand strong{display:block;font-size:13px}.footer-brand span{display:block;margin-top:3px;font-size:9px;color:#6f829a}
+.footer-links{display:flex;gap:18px}.footer-links a{text-decoration:none;color:#71839a;font-size:9px}.footer-links a:hover{color:#fff}
+.footer-copy{color:#53667d;font-size:8px;letter-spacing:.6px}
+
+@media(max-width:1050px){
+  .nav-links{display:none}.hero{grid-template-columns:1fr}.hero-right{min-height:480px}.ops-strip{grid-template-columns:1fr 1fr}.module-grid{grid-template-columns:1fr 1fr}.module.big{grid-row:auto;grid-column:span 2}.story{grid-template-columns:1fr}.story-visual{min-height:320px}
+}
+@media(max-width:700px){
+  .navbar,.hero-shell,.ops-strip,.section,.story,.cta,.footer-inner{width:min(100% - 24px,1420px)}
+  .navbar{grid-template-columns:auto auto;justify-content:space-between}.hero-left{padding:48px 24px}.hero h1{font-size:56px;letter-spacing:-2px}.hero-mini{grid-template-columns:1fr}.ops-strip{grid-template-columns:1fr}.section-head{grid-template-columns:1fr}.module-grid{grid-template-columns:1fr;grid-auto-rows:auto}.module,.module.big{min-height:230px;grid-column:auto}.story-copy{padding:32px 24px}.story-points{grid-template-columns:1fr}.cta{align-items:flex-start;flex-direction:column}.footer-inner{align-items:flex-start;flex-direction:column}.footer-links{flex-wrap:wrap}.user-info,.logout-btn{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar">SISTEM INTERN <b>•</b> RUSH ROMÂNIA <b>•</b> ACCES AUTORIZAT</div>
+
+<div class="nav-wrap">
+  <header class="navbar">
+    <a href="/" class="brand">
+      <img src="/uploads/politia-romana-logo.png" alt="Poliția Română" />
+      <div class="brand-text">
+        <strong>POLIȚIA ROMÂNĂ</strong>
+        <span>RUSH ROMÂNIA</span>
+      </div>
+    </a>
+
+    <nav class="nav-links">
+      <a href="#acasa">ACASĂ</a>
+      <a href="#module">MODULE</a>
+      <a href="#sistem">SISTEM</a>
+      <a href="/dashboard">CENTRU DE COMANDĂ</a>
+    </nav>
+
+    <div id="auth-area">
+      <a href="/auth/discord" class="login-btn">AUTENTIFICARE DISCORD</a>
+    </div>
+  </header>
+</div>
+
+<main id="acasa">
+  <section class="hero-shell">
+    <div class="hero">
+      <div class="hero-left">
+        <div class="eyebrow">Platformă operațională</div>
+        <h1>
+          <span>POLIȚIA</span>
+          <span class="outline">ROMÂNĂ</span>
+        </h1>
+        <p>
+          Centru digital pentru activitatea Poliției Române din Rush România.
+          Rapoarte, personal, callsign-uri, testări și administrare într-o interfață construită pentru acces rapid.
+        </p>
+
+        <div class="hero-actions">
+          <a href="/auth/discord" class="primary-btn" id="main-login-btn">INTRĂ ÎN SISTEM →</a>
+          <a href="#module" class="ghost-btn">VEZI MODULELE</a>
+        </div>
+
+        <div class="hero-mini">
+          <div class="mini"><strong>Acces pe grade</strong><span>Permisiuni separate</span></div>
+          <div class="mini"><strong>Activitate centralizată</strong><span>Totul într-un singur loc</span></div>
+          <div class="mini"><strong>Integrare Discord</strong><span>Autentificare rapidă</span></div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <img class="hero-photo" src="/uploads/politia-cover.jpg" alt="Poliția Română" />
+        <div class="lightbar"><span></span><span></span></div>
+        <div class="hero-badge-card">
+          <div class="left">
+            <img src="/uploads/politia-romana-logo.png" alt="" />
+            <div>
+              <strong>CENTRU OPERAȚIONAL</strong>
+              <small>Poliția Română • Rush România</small>
+            </div>
+          </div>
+          <div class="status-pill">ONLINE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ops-strip">
+    <div class="ops-item featured">
+      <span>Stare sistem</span>
+      <strong>Operațional</strong>
+      <small>Toate modulele sunt disponibile.</small>
+    </div>
+    <div class="ops-item">
+      <span>Rapoarte</span>
+      <strong>Centralizate</strong>
+      <small>Istoric și imagini într-un singur flux.</small>
+    </div>
+    <div class="ops-item">
+      <span>Personal</span>
+      <strong>Organizat</strong>
+      <small>Grade, callsign-uri și profiluri.</small>
+    </div>
+    <div class="ops-item">
+      <span>Securitate</span>
+      <strong>Controlată</strong>
+      <small>Acces în funcție de rol.</small>
+    </div>
+  </section>
+
+  <section class="section" id="module">
+    <div class="section-head">
+      <div>
+        <div class="kicker">MODULE PRINCIPALE</div>
+        <h2>Un centru de comandă construit pentru Poliție</h2>
+      </div>
+      <p>Accesează rapid instrumentele folosite zilnic fără meniuri aglomerate și fără pagini duplicate.</p>
+    </div>
+
+    <div class="module-grid">
+      <a class="module big" href="/dashboard?section=my-reports">
+        <div class="icon">▤</div>
+        <h3>Rapoarte operative</h3>
+        <p>Înregistrează activitatea, atașează imagini și urmărește istoricul complet al rapoartelor.</p>
+        <div class="arrow">↗</div>
+      </a>
+
+      <a class="module" href="/dashboard?section=personnel">
+        <div class="icon">♙</div>
+        <h3>Personal</h3>
+        <p>Membri, grade, profiluri și callsign-uri.</p>
+        <div class="arrow">↗</div>
+      </a>
+
+      <a class="module" href="/dashboard?section=tests">
+        <div class="icon">✓</div>
+        <h3>Testări</h3>
+        <p>Gestionarea candidaților și rezultatelor.</p>
+        <div class="arrow">↗</div>
+      </a>
+
+      <a class="module" href="/dashboard?section=callsign">
+        <div class="icon">#</div>
+        <h3>Callsign</h3>
+        <p>Cereri și evidență pentru indicative.</p>
+        <div class="arrow">↗</div>
+      </a>
+
+      <a class="module" href="/dashboard?section=admin">
+        <div class="icon">⚙</div>
+        <h3>Administrare</h3>
+        <p>Control avansat pentru conducere.</p>
+        <div class="arrow">↗</div>
+      </a>
+    </div>
+  </section>
+
+  <section class="story" id="sistem">
+    <div class="story-visual">
+      <img src="/uploads/politia-secondary.jpg" alt="Echipaj Poliția Română" />
+    </div>
+    <div class="story-copy">
+      <span>SISTEM INTERN</span>
+      <h2>Creat pentru activitate, nu doar pentru aspect.</h2>
+      <p>
+        Interfața pune în față informațiile importante și separă clar accesul utilizatorilor,
+        astfel încât fiecare membru să vadă doar instrumentele relevante pentru rolul său.
+      </p>
+      <div class="story-points">
+        <div>Autentificare Discord</div>
+        <div>Permisiuni pe grade</div>
+        <div>Rapoarte cu imagini</div>
+        <div>Administrare centrală</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div>
+      <h3>Intră în centrul de comandă</h3>
+      <p>Autentifică-te cu Discord pentru a accesa modulele disponibile gradului tău.</p>
+    </div>
+    <a href="/auth/discord" class="primary-btn" id="bottom-login-btn">AUTENTIFICARE →</a>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/uploads/politia-romana-logo.png" alt="Poliția Română" />
+      <div><strong>POLIȚIA ROMÂNĂ</strong><span>RUSH ROMÂNIA</span></div>
+    </div>
+    <div class="footer-links">
+      <a href="/dashboard">Centru de Comandă</a>
+      <a href="/dashboard?section=my-reports">Rapoarte</a>
+      <a href="/dashboard?section=personnel">Personal</a>
+    </div>
+    <div class="footer-copy">© 2026 POLIȚIA ROMÂNĂ • RUSH ROMÂNIA</div>
+  </div>
+</footer>
+
+<script>
+function escapeHTML(value){
+  const div=document.createElement('div');
+  div.textContent=String(value??'');
+  return div.innerHTML;
+}
+function getDiscordAvatar(user){
+  if(user&&user.id&&user.avatar){
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`;
+  }
+  return 'https://cdn.discordapp.com/embed/avatars/0.png';
+}
+function showLoggedOut(){
+  const authArea=document.getElementById('auth-area');
+  const a=document.getElementById('main-login-btn');
+  const b=document.getElementById('bottom-login-btn');
+  if(authArea) authArea.innerHTML='<a href="/auth/discord" class="login-btn">AUTENTIFICARE DISCORD</a>';
+  [a,b].forEach(btn=>{if(btn){btn.href='/auth/discord';}});
+}
+function showLoggedIn(user){
+  const authArea=document.getElementById('auth-area');
+  const displayName=user.displayName||user.globalName||user.username||'Utilizator';
+  const rank=user.rank||'MEMBRU POLIȚIE';
+  const avatarURL=getDiscordAvatar(user);
+  if(authArea){
+    authArea.innerHTML=`
+      <div class="user-menu">
+        <img src="${avatarURL}" class="user-avatar" alt="Avatar Discord">
+        <div class="user-info"><strong>${escapeHTML(displayName)}</strong><span>${escapeHTML(rank)}</span></div>
+        <a href="/logout" class="logout-btn">DECONECTARE</a>
+      </div>`;
+  }
+  ['main-login-btn','bottom-login-btn'].forEach(id=>{
+    const btn=document.getElementById(id);
+    if(btn){btn.textContent='CENTRU DE COMANDĂ →';btn.href='/dashboard';}
+  });
+}
+async function verificaAutentificarea(){
+  try{
+    const response=await fetch('/api/me',{method:'GET',credentials:'include',cache:'no-store'});
+    if(!response.ok){showLoggedOut();return;}
+    const data=await response.json();
+    if(!data.loggedIn||!data.user){showLoggedOut();return;}
+    showLoggedIn(data.user);
+  }catch(e){console.error('Eroare verificare autentificare:',e);showLoggedOut();}
+}
+window.addEventListener('pageshow',verificaAutentificarea);
+verificaAutentificarea();
+</script>
+</body>
+</html>
