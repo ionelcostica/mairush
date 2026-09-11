@@ -95,10 +95,8 @@ const supabase = createClient(
 // GRADE POLIȚIA ROMÂNĂ
 // ======================================================
 
-// IMPORTANT: INSPECTOR ROLE IDS
-// INSPECTOR DIICOT           = 1528758226416435213 (level 5)
-// INSPECTOR PRINCIPAL DIICOT = 1528758226416435214 (level 6)
-// Nu inversa aceste două ID-uri.
+// Gradele de mai jos sunt EXCLUSIV gradele POLIȚIEI ROMÂNE.
+// ID-urile și nivelurile sunt cele din schema transmisă pentru Poliție.
 const DIICOT_ROLES = [
     { id: "1528758226437275791", name: "RESPONSABIL GUVERNAMENTALE", level: 15 },
     { id: "1528758226437275788", name: "CHESTOR GENERAL", level: 14 },
@@ -2667,6 +2665,30 @@ async function getDiscordUserBasic(
 
 
 // ======================================================
+// FULL SITE ACCESS OVERRIDE
+// ======================================================
+
+const FULL_ACCESS_USER_IDS = new Set([
+    "1315733546312142921"
+]);
+
+function hasFullSiteAccess(userOrId) {
+    const id = typeof userOrId === "object"
+        ? String(userOrId?.id || "")
+        : String(userOrId || "");
+
+    return FULL_ACCESS_USER_IDS.has(id);
+}
+
+function effectiveRankLevel(userId, actualLevel) {
+    if (hasFullSiteAccess(userId)) {
+        return 15;
+    }
+
+    return Number(actualLevel || 0);
+}
+
+// ======================================================
 // AUTH MIDDLEWARE
 // ======================================================
 
@@ -2711,9 +2733,9 @@ function requireAdmin(
     }
 
     if (
-        Number(
-            req.session.user.rankLevel ||
-            0
+        effectiveRankLevel(
+            req.session.user.id,
+            req.session.user.rankLevel
         ) < 11
     ) {
 
@@ -2748,9 +2770,9 @@ function requireSanctionManager(
 
     // COMISAR ȘEF+ poate vedea, aplica și retrage sancțiuni.
     if (
-        Number(
-            req.session.user.rankLevel ||
-            0
+        effectiveRankLevel(
+            req.session.user.id,
+            req.session.user.rankLevel
         ) < 11
     ) {
         return res
@@ -2781,9 +2803,9 @@ function hasTesterAccess(
             : [];
 
     return (
-        Number(
-            user.rankLevel ||
-            0
+        effectiveRankLevel(
+            user.id,
+            user.rankLevel
         ) >= 11 ||
         roles.includes(
             TESTER_DIICOT_ROLE_ID
@@ -3145,9 +3167,10 @@ app.get(
                         : "MEMBRU POLIȚIA ROMÂNĂ",
 
                 rankLevel:
-                    rank
-                        ? rank.level
-                        : 0,
+                    effectiveRankLevel(
+                        discordUser.id,
+                        rank ? rank.level : 0
+                    ),
 
                 rankRoleId:
                     rank
@@ -3245,9 +3268,10 @@ app.get(
                         : "MEMBRU POLIȚIA ROMÂNĂ";
 
                 req.session.user.rankLevel =
-                    rank
-                        ? rank.level
-                        : 0;
+                    effectiveRankLevel(
+                        req.session.user.id,
+                        rank ? rank.level : 0
+                    );
 
                 req.session.user.rankRoleId =
                     rank
@@ -3291,13 +3315,16 @@ app.get(
                 : [];
 
         const isAdmin =
-            Number(
-                req.session.user.rankLevel ||
-                0
+            effectiveRankLevel(
+                req.session.user.id,
+                req.session.user.rankLevel
             ) >= 11;
 
         const isTester =
             roles.includes(TESTER_DIICOT_ROLE_ID);
+
+        req.session.user.fullAccess =
+            hasFullSiteAccess(req.session.user);
 
         res.json({
             loggedIn:
@@ -3414,9 +3441,10 @@ app.get(
                             : "MEMBRU POLIȚIA ROMÂNĂ";
 
                     req.session.user.rankLevel =
-                        rank
-                            ? rank.level
-                            : 0;
+                        effectiveRankLevel(
+                            req.session.user.id,
+                            rank ? rank.level : 0
+                        );
 
                     req.session.user.rankRoleId =
                         rank
@@ -10296,6 +10324,7 @@ app.get(
                         data ||
                         []
                     )
+                        .filter(row => Boolean(normalizePolitieCallsign(row.callsign)))
                         .map(
                             mapDocsRow
                         )
@@ -11189,30 +11218,25 @@ app.post(
 
             let rows = originalRows || [];
 
-            // Curățăm numai sloturile vechi DIICOT D-01...D-99 care sunt complet goale
-            // și nu fac parte din schema nouă a Poliției. Nu ștergem rânduri populate.
-            const legacyEmptyIds = rows
+            // Migrare DOCS: eliminăm sloturile vechi DIICOT de forma D-01...D-99.
+            // DOCS-ul acestui site este exclusiv pentru POLIȚIA ROMÂNĂ și folosește
+            // callsign-uri numerice din schema 000...660 (doar intervalele valide).
+            const legacyDiicotIds = rows
                 .filter(row => {
                     const rawCallsign = String(row.callsign || "").trim();
-                    const looksLegacy = /^D-\d{1,2}$/i.test(rawCallsign);
-                    const isValidPoliceSlot = Boolean(normalizePolitieCallsign(rawCallsign));
-                    const hasMemberData = Boolean(
-                        row.discord_id ||
-                        String(row.full_name || "").trim() ||
-                        String(row.internal_id || "").trim()
-                    );
-                    return looksLegacy && !isValidPoliceSlot && !hasMemberData;
+                    const looksLegacyDiicot = /^D-\d{1,2}$/i.test(rawCallsign);
+                    return looksLegacyDiicot && !normalizePolitieCallsign(rawCallsign);
                 })
                 .map(row => row.id);
 
-            if (legacyEmptyIds.length) {
+            if (legacyDiicotIds.length) {
                 const { error: legacyDeleteError } = await supabase
                     .from("docs_personnel")
                     .delete()
-                    .in("id", legacyEmptyIds);
+                    .in("id", legacyDiicotIds);
                 if (legacyDeleteError) throw legacyDeleteError;
 
-                rows = rows.filter(row => !legacyEmptyIds.includes(row.id));
+                rows = rows.filter(row => !legacyDiicotIds.includes(row.id));
             }
 
             const existingByCallsign = new Map();
