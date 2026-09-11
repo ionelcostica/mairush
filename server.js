@@ -64,8 +64,8 @@ if (
 const ANNOUNCEMENT_CHANNEL_ID = process.env.ANNOUNCEMENT_CHANNEL_ID || "";
 
 // Canale Discord pentru rapoarte operaționale
-const RAID_REPORT_CHANNEL_ID = process.env.RAID_REPORT_CHANNEL_ID || "";
-const TRAINING_REPORT_CHANNEL_ID = process.env.TRAINING_REPORT_CHANNEL_ID || "";
+const RAID_REPORT_CHANNEL_ID = "1541732669409460345";
+const TRAINING_REPORT_CHANNEL_ID = "1541879731127976056";
 
 
 const VACATION_DAYS_LIMIT = 14;
@@ -3902,7 +3902,7 @@ app.get(
 
         try {
             const members =
-                await getGuildMembersCached();
+                await getGuildMembersCached({ force: true });
 
             const currentUserId =
                 String(req.session.user.id);
@@ -3975,6 +3975,10 @@ app.get(
                         );
                 });
             }
+
+            console.log(
+                `[REPORT ORGANIZERS] Discord membri=${members.length}, POLITIE=${result.POLITIE.length}, DIICOT=${result.DIICOT.length}`
+            );
 
             return res.json(result);
 
@@ -4113,6 +4117,11 @@ async function sendOperationalReportToDiscord(
             {
                 name: "ORGANIZATOR 2",
                 value: secondOrganizer,
+                inline: false
+            },
+            {
+                name: "RAPORT",
+                value: String(report.title || "Fără titlu").slice(0, 1024),
                 inline: false
             }
         ],
@@ -4320,13 +4329,7 @@ app.post(
             "DOVADA RAZIE",
             "DOVADA ANTRENAMENT",
             "SANCTIUNE",
-            "OMOLOGARE",
-            "REGRUPARE",
-            "JAFURI",
-            "PATRULA",
-            "PERCHEZITIE",
-            "VERIFICARE ZONA",
-            "FOCURI DE ARMA"
+            "OMOLOGARE"
         ];
 
         if (!allowedTypes.includes(type)) {
@@ -4362,12 +4365,12 @@ app.post(
             });
         }
         if (
-            isParticipationProof &&
+            (isOrganizerReport || isParticipationProof) &&
             (!Array.isArray(req.files) || req.files.length < 1)
         ) {
             return res.status(400).json({
                 error:
-                    "Pentru DOVADĂ RAZIE / DOVADĂ ANTRENAMENT trebuie să încarci cel puțin o poză."
+                    "Pentru RAZIE / ANTRENAMENT și DOVADĂ RAZIE / DOVADĂ ANTRENAMENT trebuie să încarci cel puțin o poză."
             });
         }
 
