@@ -13075,6 +13075,7 @@ body{background:
 <script>
 
     let currentUser = null;
+    let currentPermissions = {};
 
     let discordRoles = [];
 
@@ -14112,6 +14113,10 @@ body{background:
                 data.user ||
                 data;
 
+            currentPermissions =
+                data.permissions ||
+                {};
+
 
             if (!currentUser) {
 
@@ -14211,11 +14216,9 @@ body{background:
                     Array.isArray(
                         currentUser.roles
                     ) &&
-                    currentUser.roles
-                        .map(String)
-                        .includes(
-                            "1528758226407919637"
-                        )
+                    Boolean(
+                        currentPermissions?.tester
+                    )
                 );
 
 
@@ -16709,11 +16712,11 @@ const query =
        TEST MANAGEMENT
     ========================================================== */
 
-    const TESTER_POLIȚIA ROMÂNĂ_ROLE_ID =
-        "1528758226407919637";
+    const TESTER_POLITIE_ROLE_ID =
+        "";
 
 
-    function isTesterPOLIȚIA ROMÂNĂ() {
+    function isTesterPolitie() {
 
         const roles =
             Array.isArray(
@@ -16723,12 +16726,19 @@ const query =
                 : [];
 
         return (
+            Boolean(
+                currentPermissions?.testManagement ||
+                currentPermissions?.tester
+            ) ||
             Number(
                 currentUser?.rankLevel ||
                 0
             ) >= 11 ||
-            roles.includes(
-                TESTER_POLIȚIA ROMÂNĂ_ROLE_ID
+            (
+                TESTER_POLITIE_ROLE_ID &&
+                roles.includes(
+                    TESTER_POLITIE_ROLE_ID
+                )
             )
         );
     }
@@ -16776,7 +16786,7 @@ const query =
                 name
             )
         ) {
-            return isTesterPOLIȚIA ROMÂNĂ();
+            return isTesterPolitie();
         }
 
         return false;
@@ -16798,7 +16808,7 @@ const query =
             Boolean(
                 tmData?.permissions?.tester
             ) ||
-            isTesterPOLIȚIA ROMÂNĂ();
+            isTesterPolitie();
 
         document
             .querySelectorAll(
@@ -16886,7 +16896,7 @@ const query =
             Boolean(
                 tmData?.permissions?.tester
             ) ||
-            isTesterPOLIȚIA ROMÂNĂ()
+            isTesterPolitie()
         ) {
             tmOpenTab(
                 "history"
