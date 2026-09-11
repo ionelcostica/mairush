@@ -9764,6 +9764,28 @@ body{background:
 
                         <button
                             type="button"
+                            class="home-action-card blue"
+                            data-report-quick="DOVADA RAZIE"
+                        >
+                            <div class="home-action-icon">◈</div>
+                            <h3>DOVADĂ RAZIE</h3>
+                            <p>Disponibil pentru toate gradele. Selectează razia la titlu și încarcă cel puțin o poză.</p>
+                            <span class="home-action-arrow">→</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="home-action-card purple"
+                            data-report-quick="DOVADA ANTRENAMENT"
+                        >
+                            <div class="home-action-icon">◎</div>
+                            <h3>DOVADĂ ANTRENAMENT</h3>
+                            <p>Disponibil pentru toate gradele. Scrie antrenamentul la titlu și încarcă cel puțin o poză.</p>
+                            <span class="home-action-arrow">→</span>
+                        </button>
+
+                        <button
+                            type="button"
                             class="home-action-card"
                             data-home-section="my-reports"
                         >
@@ -10026,11 +10048,6 @@ body{background:
                                     <option value="ANTRENAMENT" data-min-level="6">ANTRENAMENT — ORGANIZATOR</option>
                                     <option value="DOVADA RAZIE">DOVADĂ RAZIE</option>
                                     <option value="DOVADA ANTRENAMENT">DOVADĂ ANTRENAMENT</option>
-                                    <option value="JAFURI">JAFURI</option>
-                                    <option value="PATRULA">PATRULĂ</option>
-                                    <option value="PERCHEZITIE">PERCHEZIȚIE</option>
-                                    <option value="VERIFICARE ZONA">VERIFICARE ZONĂ</option>
-                                    <option value="FOCURI DE ARMA">FOCURI DE ARMĂ</option>
                                 </select>
                             </div>
                         </div>
@@ -18590,6 +18607,24 @@ const query =
         });
     });
 
+    document.querySelectorAll("[data-report-quick]").forEach(button => {
+        button.addEventListener("click", () => {
+            openSection("new-report");
+            const type = button.dataset.reportQuick || "";
+            if (reportTypeSelect) {
+                reportTypeSelect.value = type;
+                updateReportDynamicFields();
+            }
+            const titleInput = document.getElementById("report-title");
+            if (titleInput) {
+                titleInput.focus();
+                titleInput.placeholder = type === "DOVADA RAZIE"
+                    ? "Ex: Razie Los Santos • 11.09.2026"
+                    : "Ex: Antrenament tactic • 11.09.2026";
+            }
+        });
+    });
+
     reportTypeSelect?.addEventListener("change", updateReportDynamicFields);
     updateReportTypeAccess();
     updateReportDynamicFields();
@@ -18652,6 +18687,19 @@ const query =
                     return;
                 }
 
+
+                const selectedTypeForPhotoRule =
+                    document.getElementById("report-type")?.value || "";
+
+                if (
+                    ["RAZIE", "ANTRENAMENT", "DOVADA RAZIE", "DOVADA ANTRENAMENT"]
+                        .includes(selectedTypeForPhotoRule) &&
+                    files.length < 1
+                ) {
+                    message.className = "form-message error";
+                    message.textContent = "Pentru razii/antrenamente și dovezile lor trebuie să încarci cel puțin o poză.";
+                    return;
+                }
 
                 for (
                     const file
