@@ -117,6 +117,42 @@ const DIICOT_ROLES = [
     { id: "1528758226420633750", name: "CADET", level: 1 }
 ];
 
+// Alias clar: lista de mai sus este lista de grade POLIȚIA ROMÂNĂ.
+// Păstrăm DIICOT_ROLES pentru compatibilitate cu modulele vechi din proiect.
+const POLITIE_ROLES = DIICOT_ROLES;
+
+// Lista STRICTĂ folosită exclusiv de pagina „Personal Poliția Română”.
+// Un membru apare în Personal numai dacă are cel puțin unul dintre aceste roluri.
+const POLITIE_PERSONNEL_ROLES = [
+    { id: "1528758226437275791", name: "RESPONSABIL GUVERNAMENTALE", level: 15, callSign: "000 - 000" },
+    { id: "1528758226437275788", name: "CHESTOR GENERAL", level: 14, callSign: "001" },
+    { id: "1528758226437275787", name: "CHESTOR PRINCIPAL", level: 13, callSign: "002" },
+    { id: "1528758226437275786", name: "CHESTOR SECUNDAR", level: 12, callSign: "003" },
+    { id: "1528758226428891368", name: "COMISAR ȘEF", level: 11, callSign: "004 - 005" },
+    { id: "1528758226428891366", name: "COMISAR", level: 10, callSign: "006 - 007" },
+    { id: "1528758226428891365", name: "SUB COMISAR", level: 9, callSign: "008 - 009" },
+    { id: "1528758226428891364", name: "INSPECTOR PRINCIPAL", level: 8, callSign: "011 - 014" },
+    { id: "1528758226428891363", name: "INSPECTOR", level: 7, callSign: "100 - 103" },
+    { id: "1528758226428891362", name: "SUB INSPECTOR", level: 6, callSign: "150 - 152" },
+    { id: "1528758226428891361", name: "AGENT ȘEF PRINCIPAL", level: 5, callSign: "200 - 205" },
+    { id: "1528758226428891360", name: "AGENT ȘEF ADJUNCT", level: 4, callSign: "300 - 308" },
+    { id: "1528758226428891359", name: "AGENT PRINCIPAL", level: 3, callSign: "400 - 409" },
+    { id: "1528758226420633752", name: "AGENT", level: 2, callSign: "500 - 515" },
+    { id: "1528758226420633750", name: "CADET", level: 1, callSign: "600 - 660" }
+];
+
+function getHighestPolitieRole(roles = []) {
+    const ids = Array.isArray(roles) ? roles.map(String) : [];
+    let best = null;
+
+    for (const role of POLITIE_PERSONNEL_ROLES) {
+        if (!ids.includes(String(role.id))) continue;
+        if (!best || Number(role.level) > Number(best.level)) best = role;
+    }
+
+    return best;
+}
+
 
 // ======================================================
 // ORGANIZATORI RAZIE / ANTRENAMENT
@@ -3901,8 +3937,16 @@ app.get(
         }
 
         try {
-            const members =
-                await getGuildMembersCached({ force: true });
+            let members = [];
+            try {
+                members = await getGuildMembersCached({ force: true });
+            }
+            catch (listError) {
+                console.error(
+                    "Report organizers guild-list warning:",
+                    listError.response?.data || listError.message
+                );
+            }
 
             const currentUserId =
                 String(req.session.user.id);
@@ -3959,6 +4003,64 @@ app.get(
                         weight:
                             Number(rank.weight || 0)
                     });
+                }
+            }
+
+            // Fallback: folosim membrii cunoscuți de site din rank_progress și
+            // îi verificăm individual în Discord. Ajută când listarea completă a
+            // guild-ului este incompletă / limitată.
+            const alreadyAdded = new Set([
+                ...result.POLITIE.map(item => `${item.department}:${item.id}`),
+                ...result.DIICOT.map(item => `${item.department}:${item.id}`)
+            ]);
+
+            const allAllowedRoleIds = [
+                ...REPORT_ORGANIZER_DEPARTMENTS.POLITIE,
+                ...REPORT_ORGANIZER_DEPARTMENTS.DIICOT
+            ].map(role => role.id);
+
+            const knownCandidates = await fetchKnownRankCandidates(allAllowedRoleIds);
+
+            for (const candidate of knownCandidates) {
+                if (String(candidate.userId) === currentUserId) continue;
+
+                let member = null;
+                try {
+                    member = await getDiscordMemberCached(candidate.userId, { force: true });
+                }
+                catch (_) {}
+
+                const user = member?.user || { id: candidate.userId };
+                if (user.bot) continue;
+
+                const roles = Array.isArray(member?.roles)
+                    ? member.roles.map(String)
+                    : [candidate.rankRoleId];
+
+                for (const department of ["POLITIE", "DIICOT"]) {
+                    const rank = getReportOrganizerRank(roles, department);
+                    if (!rank) continue;
+
+                    const key = `${department}:${candidate.userId}`;
+                    if (alreadyAdded.has(key)) continue;
+
+                    result[department].push({
+                        id: String(candidate.userId),
+                        username: user.username || candidate.displayName || "Necunoscut",
+                        displayName:
+                            member?.nick ||
+                            user.global_name ||
+                            candidate.displayName ||
+                            user.username ||
+                            "Necunoscut",
+                        avatar: user.id ? discordMemberAvatar(user) : "",
+                        department,
+                        rank: rank.name,
+                        rankRoleId: rank.id,
+                        weight: Number(rank.weight || 0)
+                    });
+
+                    alreadyAdded.add(key);
                 }
             }
 
@@ -8139,7 +8241,7 @@ function mapDiscordPersonnelMember(member) {
                 : [];
 
         const rank =
-            getHighestDIICOTRole(
+            getHighestPolitieRole(
                 roles
             );
 
@@ -8173,7 +8275,10 @@ function mapDiscordPersonnelMember(member) {
                 Number(rank.level || 0),
 
             rankRoleId:
-                rank.id
+                rank.id,
+
+            callSignRange:
+                rank.callSign || ""
         };
     }
     catch (error) {
@@ -8253,6 +8358,72 @@ async function fetchPersonnelFallbackIds() {
 
 
 // ======================================================
+// FALLBACK MEMBRI CUNOSCUȚI DIN SUPABASE
+// Folosit când Discord nu întoarce complet lista guild-ului.
+// rank_progress păstrează user_id + rank_role_id pentru membrii văzuți de site.
+// ======================================================
+
+async function fetchKnownRankCandidates(allowedRoleIds = []) {
+    const allowed = new Set((allowedRoleIds || []).map(String));
+    const out = [];
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !allowed.size) {
+        return out;
+    }
+
+    try {
+        const { data: ranks, error: rankError } = await supabase
+            .from("rank_progress")
+            .select("user_id,rank_role_id,rank_name");
+
+        if (rankError) throw rankError;
+
+        const rows = (ranks || []).filter(row =>
+            allowed.has(String(row.rank_role_id || "")) &&
+            /^\d{17,20}$/.test(String(row.user_id || ""))
+        );
+
+        if (!rows.length) return out;
+
+        const ids = rows.map(row => String(row.user_id));
+        let profileMap = new Map();
+
+        try {
+            const { data: profiles, error: profileError } = await supabase
+                .from("user_profiles")
+                .select("user_id,display_name")
+                .in("user_id", ids);
+
+            if (!profileError) {
+                profileMap = new Map((profiles || []).map(row => [
+                    String(row.user_id),
+                    String(row.display_name || "").trim()
+                ]));
+            }
+        }
+        catch (_) {}
+
+        for (const row of rows) {
+            out.push({
+                userId: String(row.user_id),
+                rankRoleId: String(row.rank_role_id),
+                rankName: String(row.rank_name || ""),
+                displayName: profileMap.get(String(row.user_id)) || ""
+            });
+        }
+    }
+    catch (error) {
+        console.error(
+            "Known rank candidates fallback error:",
+            error.message || error
+        );
+    }
+
+    return out;
+}
+
+
+// ======================================================
 // DEBUG PERSONAL POLIȚIA ROMÂNĂ — doar utilizator autentificat
 // Returnează rolurile proprii și gradul Poliției detectat.
 // Nu expune token-uri sau secrete.
@@ -8297,7 +8468,7 @@ app.get(
                 success: true,
                 userId,
                 roles,
-                matchedDIICOTRole:
+                matchedPOLITIERole:
                     rank
                         ? {
                             id: rank.id,
@@ -8305,8 +8476,8 @@ app.get(
                             level: rank.level
                         }
                         : null,
-                configuredDIICOTRoleIds:
-                    DIICOT_ROLES.map(
+                configuredPOLITIERoleIds:
+                    POLITIE_PERSONNEL_ROLES.map(
                         role => role.id
                     )
             });
@@ -8400,7 +8571,48 @@ app.get(
             }
 
             // --------------------------------------------------
-            // 2. Garantăm verificarea utilizatorului autentificat.
+            // 2. Fallback din rank_progress pentru membrii POLIȚIEI.
+            // Dacă Discord nu listează toți membrii, folosim utilizatorii
+            // cunoscuți de site și îi verificăm individual.
+            // --------------------------------------------------
+            const knownPolice = await fetchKnownRankCandidates(
+                POLITIE_PERSONNEL_ROLES.map(role => role.id)
+            );
+
+            for (const candidate of knownPolice) {
+                if (personnelById.has(candidate.userId)) continue;
+
+                let mapped = null;
+                try {
+                    const member = await getDiscordMemberCached(candidate.userId, { force: true });
+                    mapped = mapDiscordPersonnelMember(member);
+                }
+                catch (_) {}
+
+                if (!mapped) {
+                    const role = POLITIE_PERSONNEL_ROLES.find(item =>
+                        String(item.id) === String(candidate.rankRoleId)
+                    );
+
+                    if (role) {
+                        mapped = {
+                            id: candidate.userId,
+                            username: candidate.displayName || "Necunoscut",
+                            displayName: candidate.displayName || "Necunoscut",
+                            avatar: "",
+                            rank: role.name,
+                            rankLevel: Number(role.level || 0),
+                            rankRoleId: role.id,
+                            callSignRange: role.callSign || ""
+                        };
+                    }
+                }
+
+                if (mapped) personnelById.set(mapped.id, mapped);
+            }
+
+            // --------------------------------------------------
+            // 3. Garantăm verificarea utilizatorului autentificat.
             // Dacă este DIICOT, trebuie să apară chiar dacă listarea
             // mare a Discordului nu l-a returnat.
             // --------------------------------------------------
@@ -8424,7 +8636,7 @@ app.get(
             }
 
             // --------------------------------------------------
-            // 3. Adăugăm ca fallback și ID-urile deja cunoscute
+            // 4. Adăugăm ca fallback și ID-urile deja cunoscute
             // din DOCS. Nu modificăm și nu ștergem nimic din DOCS.
             // --------------------------------------------------
             const docsIds =
@@ -8440,7 +8652,7 @@ app.get(
             }
 
             // --------------------------------------------------
-            // 4. Membrii care lipsesc sunt verificați individual
+            // 5. Membrii care lipsesc sunt verificați individual
             // direct în Discord.
             // --------------------------------------------------
             for (
@@ -8520,7 +8732,7 @@ app.get(
                     );
 
             const grouped =
-                DIICOT_ROLES
+                POLITIE_PERSONNEL_ROLES
                     .map(
                         role => ({
                             id:
@@ -8531,6 +8743,9 @@ app.get(
 
                             level:
                                 role.level,
+
+                            callSignRange:
+                                role.callSign || "",
 
                             members:
                                 personnel.filter(
