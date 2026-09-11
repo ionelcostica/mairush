@@ -136,6 +136,18 @@ const REPORT_ORGANIZER_DEPARTMENTS = {
         { id: "1528758226437275787", name: "CHESTOR PRINCIPAL", weight: 8 },
         { id: "1528758226437275788", name: "CHESTOR GENERAL", weight: 9 },
         { id: "1528758226437275791", name: "RESPONSABIL GUVERNAMENTALE", weight: 10 }
+    ],
+    DIICOT: [
+        { id: "1528758226416435211", name: "SUB INSPECTOR DIICOT", weight: 1 },
+        { id: "1528758226416435213", name: "INSPECTOR DIICOT", weight: 2 },
+        { id: "1528758226416435214", name: "INSPECTOR PRINCIPAL DIICOT", weight: 3 },
+        { id: "1528758226416435215", name: "SUB COMISAR DIICOT", weight: 4 },
+        { id: "1528758226416435216", name: "COMISAR DIICOT", weight: 5 },
+        { id: "1528758226416435217", name: "COMISAR ȘEF DIICOT", weight: 6 },
+        { id: "1528758226416435219", name: "COORDONATOR DIICOT", weight: 7 },
+        { id: "1528758226420633744", name: "PROCUROR DIICOT", weight: 8 },
+        { id: "1528758226420633745", name: "PROCUROR ȘEF ADJUNCT DIICOT", weight: 9 },
+        { id: "1528758226420633746", name: "PROCUROR ȘEF DIICOT", weight: 10 }
     ]
 };
 
@@ -1540,6 +1552,10 @@ function mapB2Report(report) {
 
         description:
             report.description,
+
+        details:
+            report.details ||
+            null,
 
         coOrganizer:
             report.coOrganizer ||
@@ -3892,7 +3908,8 @@ app.get(
                 String(req.session.user.id);
 
             const result = {
-                POLITIE: []
+                POLITIE: [],
+                DIICOT: []
             };
 
             for (const member of members) {
@@ -3911,7 +3928,7 @@ app.get(
                         ? member.roles.map(String)
                         : [];
 
-                for (const department of ["POLITIE"]) {
+                for (const department of ["POLITIE", "DIICOT"]) {
                     const rank =
                         getReportOrganizerRank(
                             roles,
@@ -3945,7 +3962,7 @@ app.get(
                 }
             }
 
-            for (const department of ["POLITIE"]) {
+            for (const department of ["POLITIE", "DIICOT"]) {
                 result[department].sort((a, b) => {
                     if (b.weight !== a.weight) {
                         return b.weight - a.weight;
@@ -4302,6 +4319,8 @@ app.post(
             "ANTRENAMENT",
             "DOVADA RAZIE",
             "DOVADA ANTRENAMENT",
+            "SANCTIUNE",
+            "OMOLOGARE",
             "REGRUPARE",
             "JAFURI",
             "PATRULA",
@@ -4352,6 +4371,32 @@ app.post(
             });
         }
 
+        let details = null;
+
+        if (type === "SANCTIUNE") {
+            const agentName = String(req.body.agentName || "").trim();
+            const suspectName = String(req.body.suspectName || "").trim();
+            const fineReason = String(req.body.fineReason || "").trim();
+            const fineAmount = String(req.body.fineAmount || "").trim();
+            const jailReason = String(req.body.jailReason || "").trim();
+            const jailMonths = String(req.body.jailMonths || "").trim();
+
+            if (!agentName || !suspectName || !fineReason || !fineAmount || !jailReason || !jailMonths) {
+                return res.status(400).json({
+                    error: "Completează toate câmpurile raportului de sancțiune."
+                });
+            }
+
+            details = {
+                agentName,
+                suspectName,
+                fineReason,
+                fineAmount,
+                jailReason,
+                jailMonths
+            };
+        }
+
         if (
             title.length < 2 ||
             title.length > 120
@@ -4371,13 +4416,13 @@ app.post(
         if (needsCoOrganizer) {
             if (
                 !coOrganizerId ||
-                !["POLITIE"].includes(
+                !["POLITIE", "DIICOT"].includes(
                     coOrganizerDepartment
                 )
             ) {
                 return res.status(400).json({
                     error:
-                        "Pentru RAZIE și ANTRENAMENT trebuie să selectezi al doilea organizator din POLIȚIE."
+                        "Pentru RAZIE și ANTRENAMENT trebuie să selectezi al doilea organizator din POLIȚIE sau DIICOT."
                 });
             }
 
@@ -4422,7 +4467,7 @@ app.post(
                 if (!organizerRank) {
                     return res.status(400).json({
                         error:
-                            `Persoana selectată nu mai are un grad eligibil de Sub Inspector+ în POLIȚIE.`
+                            `Persoana selectată nu mai are un grad eligibil de Sub Inspector+ în ${coOrganizerDepartment}.`
                     });
                 }
 
@@ -4501,6 +4546,7 @@ app.post(
                 type,
                 title,
                 description,
+                details,
                 coOrganizer,
                 images: uploadedImages,
                 createdAt: now
