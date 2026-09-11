@@ -8478,6 +8478,20 @@
 .report-premium-message{margin-top:2px;border-radius:10px;}
 .report-premium-message.success{padding:11px 13px;background:rgba(29,180,110,.08);border:1px solid rgba(29,180,110,.22);color:#57d99d;}
 .report-premium-message.error{padding:11px 13px;background:rgba(235,76,76,.08);border:1px solid rgba(235,76,76,.22);color:#ff7373;}
+
+.report-dynamic-hidden{display:none!important;}
+.report-organizer-tabs{display:flex;gap:9px;margin:0 0 12px;flex-wrap:wrap;}
+.report-organizer-tab{height:38px;padding:0 15px;border-radius:10px;border:1px solid rgba(78,101,129,.52);background:rgba(4,14,25,.55);color:#8394a8;font-size:10px;font-weight:900;letter-spacing:.55px;cursor:pointer;transition:.18s ease;}
+.report-organizer-tab.active{color:#f3c35b;border-color:rgba(229,170,49,.55);background:rgba(229,170,49,.09);box-shadow:0 0 0 2px rgba(229,170,49,.035);}
+.report-organizer-help{margin-top:8px;color:#6f8195;font-size:10px;line-height:1.5;}
+.report-details-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.report-details-grid .report-field-body{padding:1px 0;}
+.report-details-grid label{display:block;margin:0 0 8px;font-size:10px;font-weight:900;letter-spacing:.7px;color:#aebdce;}
+.report-details-grid input{width:100%;height:50px;border-radius:11px;border:1px solid rgba(54,74,97,.55)!important;background:rgba(3,12,22,.58)!important;color:#f2f6fa!important;padding:0 15px!important;font-size:14px!important;outline:none;box-sizing:border-box;}
+.report-details-grid input:focus{border-color:rgba(228,169,48,.55)!important;box-shadow:0 0 0 3px rgba(228,169,48,.055);}
+.report-detail-summary{margin:12px 0 2px;padding:12px 14px;border-radius:10px;border:1px solid rgba(229,170,49,.16);background:rgba(229,170,49,.04);font-size:11px;line-height:1.65;color:#aebdce;}
+.report-detail-summary strong{color:#f1c15b;}
+@media(max-width:800px){.report-details-grid{grid-template-columns:1fr;}}
 @media(max-width:800px){.report-premium-shell{padding:18px}.report-premium-hero{min-height:auto}.report-hero-art{display:none}.report-premium-hero h2{font-size:31px}.report-field-card{grid-template-columns:1fr}.report-field-icon{display:none}.report-form-footer{align-items:stretch;flex-direction:column}.report-submit-btn{width:100%}}
 
         /* FIX: o singură secțiune vizibilă în dashboard */
@@ -10006,8 +10020,12 @@ body{background:
                                 <label for="report-type">TIP RAPORT</label>
                                 <select id="report-type" name="type" required>
                                     <option value="">Selectează tipul raportului</option>
-                                    <option value="RAZIE">RAZIE</option>
-                                    <option value="ANTRENAMENT">ANTRENAMENT</option>
+                                    <option value="SANCTIUNE">SANCȚIUNE / AMENDĂ / ÎNCHISOARE</option>
+                                    <option value="OMOLOGARE">OMOLOGARE</option>
+                                    <option value="RAZIE" data-min-level="6">RAZIE — ORGANIZATOR</option>
+                                    <option value="ANTRENAMENT" data-min-level="6">ANTRENAMENT — ORGANIZATOR</option>
+                                    <option value="DOVADA RAZIE">DOVADĂ RAZIE</option>
+                                    <option value="DOVADA ANTRENAMENT">DOVADĂ ANTRENAMENT</option>
                                     <option value="JAFURI">JAFURI</option>
                                     <option value="PATRULA">PATRULĂ</option>
                                     <option value="PERCHEZITIE">PERCHEZIȚIE</option>
@@ -10017,7 +10035,55 @@ body{background:
                             </div>
                         </div>
 
-                        <div class="report-field-card">
+                        <div class="report-field-card report-dynamic-hidden" id="report-organizer-card">
+                            <div class="report-field-icon">◎</div>
+                            <div class="report-field-body">
+                                <label>AL DOILEA ORGANIZATOR • SUB INSPECTOR+</label>
+                                <div class="report-organizer-tabs">
+                                    <button type="button" class="report-organizer-tab active" data-report-department="POLITIE">POLIȚIA ROMÂNĂ</button>
+                                    <button type="button" class="report-organizer-tab" data-report-department="DIICOT">DIICOT</button>
+                                </div>
+                                <select id="report-co-organizer">
+                                    <option value="">Selectează organizatorul...</option>
+                                </select>
+                                <div class="report-organizer-help" id="report-organizer-help">Se afișează doar membrii cu grad de Sub Inspector sau mai mare.</div>
+                            </div>
+                        </div>
+
+                        <div class="report-field-card report-dynamic-hidden" id="report-sanction-card">
+                            <div class="report-field-icon">§</div>
+                            <div class="report-field-body">
+                                <label>DATE SANCȚIUNE</label>
+                                <div class="report-details-grid">
+                                    <div class="report-field-body">
+                                        <label for="report-agent-name">NUME & PRENUME AGENT</label>
+                                        <input type="text" id="report-agent-name" maxlength="100" placeholder="Ex: Basarab Emanuel">
+                                    </div>
+                                    <div class="report-field-body">
+                                        <label for="report-suspect-name">NUME & PRENUME SUSPECT</label>
+                                        <input type="text" id="report-suspect-name" maxlength="100" placeholder="Ex: Valverde Leonardo">
+                                    </div>
+                                    <div class="report-field-body">
+                                        <label for="report-fine-reason">MOTIV SANCȚIUNE (AMENDĂ)</label>
+                                        <input type="text" id="report-fine-reason" maxlength="250" placeholder="Ex: Art. 110, Art. 404, Art. 300">
+                                    </div>
+                                    <div class="report-field-body">
+                                        <label for="report-fine-amount">SANCȚIUNE (AMENDĂ)</label>
+                                        <input type="text" id="report-fine-amount" maxlength="80" placeholder="Ex: 190.000$">
+                                    </div>
+                                    <div class="report-field-body">
+                                        <label for="report-jail-reason">MOTIV SANCȚIUNE (ÎNCHISOARE)</label>
+                                        <input type="text" id="report-jail-reason" maxlength="250" placeholder="Ex: Legea 3 Art. 300, Art. 310">
+                                    </div>
+                                    <div class="report-field-body">
+                                        <label for="report-jail-months">SANCȚIUNE (ÎNCHISOARE)</label>
+                                        <input type="text" id="report-jail-months" maxlength="80" placeholder="Ex: 40 luni">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-field-card" id="report-title-card">
                             <div class="report-field-icon report-title-icon">T</div>
                             <div class="report-field-body">
                                 <label for="report-title">TITLU</label>
@@ -14121,6 +14187,12 @@ body{background:
             currentPermissions =
                 data.permissions ||
                 {};
+
+
+            if (typeof updateReportTypeAccess === "function") {
+                updateReportTypeAccess();
+                updateReportDynamicFields();
+            }
 
 
             if (!currentUser) {
@@ -18425,6 +18497,104 @@ const query =
     ["dragleave", "drop"].forEach(evt => reportDropzone?.addEventListener(evt, () => reportDropzone.classList.remove("dragging")));
 
     /* =========================================================
+       RAPORT NOU — TIPURI, SANCȚIUNI ȘI ORGANIZATORI
+    ========================================================== */
+
+    const reportTypeSelect = document.getElementById("report-type");
+    const reportOrganizerCard = document.getElementById("report-organizer-card");
+    const reportCoOrganizerSelect = document.getElementById("report-co-organizer");
+    const reportSanctionCard = document.getElementById("report-sanction-card");
+    const reportTitleCard = document.getElementById("report-title-card");
+    const reportTitleInput = document.getElementById("report-title");
+    let reportOrganizerDepartment = "POLITIE";
+    let reportOrganizerCache = { POLITIE: [], DIICOT: [] };
+    let reportOrganizersLoaded = false;
+
+    function updateOrganizerOptions() {
+        if (!reportCoOrganizerSelect) return;
+        const rows = Array.isArray(reportOrganizerCache[reportOrganizerDepartment])
+            ? reportOrganizerCache[reportOrganizerDepartment]
+            : [];
+        reportCoOrganizerSelect.innerHTML = '<option value="">Selectează organizatorul...</option>' +
+            rows.map(member => `<option value="${escapeHTML(member.id)}">${escapeHTML(member.displayName || member.username || "Necunoscut")} • ${escapeHTML(member.rank || "-")}</option>`).join("");
+
+        const help = document.getElementById("report-organizer-help");
+        if (help) {
+            help.textContent = rows.length
+                ? `${rows.length} membri eligibili în ${reportOrganizerDepartment === "POLITIE" ? "POLIȚIA ROMÂNĂ" : "DIICOT"}.`
+                : `Nu există membri eligibili Sub Inspector+ în ${reportOrganizerDepartment === "POLITIE" ? "POLIȚIA ROMÂNĂ" : "DIICOT"}.`;
+        }
+    }
+
+    async function ensureReportOrganizersLoaded(force = false) {
+        if (reportOrganizersLoaded && !force) {
+            updateOrganizerOptions();
+            return;
+        }
+        const help = document.getElementById("report-organizer-help");
+        if (help) help.textContent = "Se încarcă membrii eligibili din Discord...";
+        try {
+            const response = await fetch("/api/report-organizers", {
+                credentials: "include",
+                cache: "no-store"
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Lista organizatorilor nu a putut fi încărcată.");
+            reportOrganizerCache = {
+                POLITIE: Array.isArray(data.POLITIE) ? data.POLITIE : [],
+                DIICOT: Array.isArray(data.DIICOT) ? data.DIICOT : []
+            };
+            reportOrganizersLoaded = true;
+            updateOrganizerOptions();
+        } catch (error) {
+            if (help) help.textContent = error.message || "Lista organizatorilor nu a putut fi încărcată.";
+        }
+    }
+
+    function updateReportTypeAccess() {
+        if (!reportTypeSelect) return;
+        const level = Number(currentUser?.rankLevel || 0);
+        reportTypeSelect.querySelectorAll("option[data-min-level]").forEach(option => {
+            const allowed = level >= Number(option.dataset.minLevel || 0);
+            option.hidden = !allowed;
+            option.disabled = !allowed;
+            if (!allowed && reportTypeSelect.value === option.value) reportTypeSelect.value = "";
+        });
+    }
+
+    function updateReportDynamicFields() {
+        const type = String(reportTypeSelect?.value || "");
+        const isOrganizer = type === "RAZIE" || type === "ANTRENAMENT";
+        const isSanction = type === "SANCTIUNE";
+
+        reportOrganizerCard?.classList.toggle("report-dynamic-hidden", !isOrganizer);
+        reportSanctionCard?.classList.toggle("report-dynamic-hidden", !isSanction);
+        reportTitleCard?.classList.toggle("report-dynamic-hidden", isSanction);
+
+        const sanctionInputs = [
+            "report-agent-name", "report-suspect-name", "report-fine-reason",
+            "report-fine-amount", "report-jail-reason", "report-jail-months"
+        ].map(id => document.getElementById(id)).filter(Boolean);
+        sanctionInputs.forEach(input => input.required = isSanction);
+        if (reportTitleInput) reportTitleInput.required = !isSanction;
+
+        if (isOrganizer) ensureReportOrganizersLoaded();
+        if (!isOrganizer && reportCoOrganizerSelect) reportCoOrganizerSelect.value = "";
+    }
+
+    document.querySelectorAll("[data-report-department]").forEach(button => {
+        button.addEventListener("click", () => {
+            reportOrganizerDepartment = button.dataset.reportDepartment || "POLITIE";
+            document.querySelectorAll("[data-report-department]").forEach(item => item.classList.toggle("active", item === button));
+            updateOrganizerOptions();
+        });
+    });
+
+    reportTypeSelect?.addEventListener("change", updateReportDynamicFields);
+    updateReportTypeAccess();
+    updateReportDynamicFields();
+
+    /* =========================================================
        REPORT FORM
     ========================================================== */
 
@@ -18510,19 +18680,58 @@ const query =
                     new FormData();
 
 
-                formData.append(
-                    "type",
+                const selectedReportType =
                     document.getElementById(
                         "report-type"
-                    ).value
+                    ).value;
+
+                formData.append(
+                    "type",
+                    selectedReportType
                 );
 
+                let reportTitle =
+                    document.getElementById(
+                        "report-title"
+                    ).value.trim();
+
+                if (selectedReportType === "SANCTIUNE") {
+                    const agentName = document.getElementById("report-agent-name")?.value.trim() || "";
+                    const suspectName = document.getElementById("report-suspect-name")?.value.trim() || "";
+                    const fineReason = document.getElementById("report-fine-reason")?.value.trim() || "";
+                    const fineAmount = document.getElementById("report-fine-amount")?.value.trim() || "";
+                    const jailReason = document.getElementById("report-jail-reason")?.value.trim() || "";
+                    const jailMonths = document.getElementById("report-jail-months")?.value.trim() || "";
+
+                    if (!agentName || !suspectName || !fineReason || !fineAmount || !jailReason || !jailMonths) {
+                        message.className = "form-message error";
+                        message.textContent = "Completează toate câmpurile raportului de sancțiune.";
+                        return;
+                    }
+
+                    reportTitle = `Sancțiune • ${suspectName}`;
+                    formData.append("agentName", agentName);
+                    formData.append("suspectName", suspectName);
+                    formData.append("fineReason", fineReason);
+                    formData.append("fineAmount", fineAmount);
+                    formData.append("jailReason", jailReason);
+                    formData.append("jailMonths", jailMonths);
+                }
+
+                if (selectedReportType === "RAZIE" || selectedReportType === "ANTRENAMENT") {
+                    const organizerId = reportCoOrganizerSelect?.value || "";
+                    if (!organizerId) {
+                        message.className = "form-message error";
+                        message.textContent = "Selectează al doilea organizator din POLIȚIE sau DIICOT.";
+                        return;
+                    }
+                    formData.append("coOrganizerId", organizerId);
+                    formData.append("coOrganizerDepartment", reportOrganizerDepartment);
+                }
 
                 formData.append(
                     "title",
-                    document.getElementById(
-                        "report-title"
-                    ).value.trim()
+                    reportTitle
                 );
 
 
@@ -18586,6 +18795,9 @@ const query =
 
 
                     this.reset();
+                    reportOrganizerDepartment = "POLITIE";
+                    document.querySelectorAll("[data-report-department]").forEach(item => item.classList.toggle("active", item.dataset.reportDepartment === "POLITIE"));
+                    updateReportDynamicFields();
                     refreshReportFileSummary();
 
 
@@ -18956,6 +19168,24 @@ const query =
                         ""
                     )}
                 </div>
+
+                ${report.coOrganizer ? `
+                    <div class="report-detail-summary">
+                        <strong>ORGANIZATOR 2:</strong>
+                        ${escapeHTML(report.coOrganizer.displayName || report.coOrganizer.username || "Necunoscut")}
+                        • ${escapeHTML(report.coOrganizer.rank || "-")}
+                        • ${escapeHTML(report.coOrganizer.department || "-")}
+                    </div>
+                ` : ""}
+
+                ${report.details && report.type === "SANCTIUNE" ? `
+                    <div class="report-detail-summary">
+                        <strong>AGENT:</strong> ${escapeHTML(report.details.agentName || "-")}<br>
+                        <strong>SUSPECT:</strong> ${escapeHTML(report.details.suspectName || "-")}<br>
+                        <strong>AMENDĂ:</strong> ${escapeHTML(report.details.fineAmount || "-")} • ${escapeHTML(report.details.fineReason || "-")}<br>
+                        <strong>ÎNCHISOARE:</strong> ${escapeHTML(report.details.jailMonths || "-")} • ${escapeHTML(report.details.jailReason || "-")}
+                    </div>
+                ` : ""}
 
 
                 ${
