@@ -1617,6 +1617,24 @@ async function readB2JSON(key) {
     return JSON.parse(text);
 }
 
+async function writeB2JSON(key, value) {
+    const body = Buffer.from(
+        JSON.stringify(value, null, 2),
+        "utf-8"
+    );
+
+    await b2.send(
+        new PutObjectCommand({
+            Bucket: B2_BUCKET,
+            Key: key,
+            Body: body,
+            ContentLength: body.length,
+            ContentType: "application/json; charset=utf-8",
+            CacheControl: "no-store"
+        })
+    );
+}
+
 // ======================================================
 // CACHE RAPOARTE BACKBLAZE B2
 // Evită descărcarea tuturor fișierelor JSON la fiecare accesare.
@@ -1791,26 +1809,17 @@ async function getAllB2ReportsCached() {
 }
 
 async function listB2Reports(authorId = null) {
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-        throw new Error("Supabase nu este configurat.");
+    const reports = await getAllB2ReportsCached();
+
+    if (!authorId) {
+        return reports;
     }
 
-    let query = supabase
-        .from("reports")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-    if (authorId) {
-        query = query.eq("author_id", String(authorId));
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-        throw error;
-    }
-
-    return (data || []).map(mapB2Report);
+    return reports.filter(
+        report =>
+            String(report.authorId || "") ===
+            String(authorId)
+    );
 }
 
 async function listB2ObjectVersions(prefix) {
@@ -4462,11 +4471,9 @@ app.post(
 
         let uploadedImages = [];
 
-        try {
-            if (!ensureSupabase(res)) {
-                return;
-            }
+        let reportJsonKey = null;
 
+        try {
             uploadedImages =
                 await uploadReportImagesToB2(
                     req.files || [],
@@ -4499,27 +4506,15 @@ app.post(
                 createdAt: now
             };
 
-            const { error: reportInsertError } =
-                await supabase
-                    .from("reports")
-                    .insert({
-                        id: reportId,
-                        author_id: authorId,
-                        author_name: report.authorName,
-                        author_username: report.authorUsername,
-                        author_rank: report.authorRank,
-                        author_rank_level: report.authorRankLevel,
-                        type,
-                        title,
-                        description,
-                        co_organizer: coOrganizer,
-                        images: uploadedImages,
-                        created_at: now
-                    });
+            reportJsonKey =
+                `reports/${authorId}/${reportId}.json`;
 
-            if (reportInsertError) {
-                throw reportInsertError;
-            }
+            await writeB2JSON(
+                reportJsonKey,
+                report
+            );
+
+            addReportToB2Cache(report);
 
             let discordNotification = {
                 sent: false,
@@ -4571,6 +4566,7 @@ app.post(
             );
 
             const cleanupKeys = [
+                reportJsonKey,
                 ...uploadedImages.map(
                     image =>
                         image.key ||
@@ -4684,7 +4680,7 @@ app.delete(
     "/api/admin/reports/all",
     requireAdmin,
     async (req, res) => {
-        if (!ensureSupabase(res) || !ensureB2(res)) {
+        if (!ensureB2(res)) {
             return;
         }
 
@@ -4695,42 +4691,44 @@ app.delete(
         }
 
         try {
-            const { data: reportRows, error: reportsError } =
-                await supabase
-                    .from("reports")
-                    .select("id,images");
+            const reportKeys =
+                (await listB2ObjectKeys("reports/"))
+                    .filter(key => key.endsWith(".json"));
 
-            if (reportsError) throw reportsError;
+            const imageKeys =
+                await listB2ObjectKeys("images/");
 
-            const imageKeys = (reportRows || [])
-                .flatMap(row => Array.isArray(row.images) ? row.images : [])
-                .map(image => image?.key || image?.path)
-                .filter(Boolean);
+            const allKeys = [
+                ...reportKeys,
+                ...imageKeys
+            ];
 
-            if (imageKeys.length) {
+            if (allKeys.length) {
                 const versions = [];
-                for (const key of imageKeys) {
-                    const objectVersions = await listB2ObjectVersions(String(key));
+
+                for (const key of allKeys) {
+                    const objectVersions =
+                        await listB2ObjectVersions(
+                            String(key)
+                        );
+
                     versions.push(...objectVersions);
                 }
-                await deleteB2Objects(versions.length ? versions : imageKeys.map(Key => ({ Key })));
+
+                await deleteB2Objects(
+                    versions.length
+                        ? versions
+                        : allKeys.map(Key => ({ Key }))
+                );
             }
-
-            const { error: deleteError } =
-                await supabase
-                    .from("reports")
-                    .delete()
-                    .neq("id", "");
-
-            if (deleteError) throw deleteError;
 
             clearB2ReportCache();
 
             return res.json({
                 success: true,
-                deletedReports: (reportRows || []).length,
+                deletedReports: reportKeys.length,
                 deletedImages: imageKeys.length,
-                message: "Toate rapoartele și imaginile lor au fost șterse."
+                message: "Toate rapoartele și imaginile lor au fost șterse din Backblaze B2."
             });
         }
         catch (error) {
