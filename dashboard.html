@@ -8479,6 +8479,11 @@
 .report-premium-message.success{padding:11px 13px;background:rgba(29,180,110,.08);border:1px solid rgba(29,180,110,.22);color:#57d99d;}
 .report-premium-message.error{padding:11px 13px;background:rgba(235,76,76,.08);border:1px solid rgba(235,76,76,.22);color:#ff7373;}
 @media(max-width:800px){.report-premium-shell{padding:18px}.report-premium-hero{min-height:auto}.report-hero-art{display:none}.report-premium-hero h2{font-size:31px}.report-field-card{grid-template-columns:1fr}.report-field-icon{display:none}.report-form-footer{align-items:stretch;flex-direction:column}.report-submit-btn{width:100%}}
+
+        /* FIX: o singură secțiune vizibilă în dashboard */
+        .dashboard-content > .dashboard-section { display: none !important; }
+        .dashboard-content > .dashboard-section.active { display: block !important; }
+
 </style>
 
 <style id="sanction-premium-styles">
@@ -15236,107 +15241,68 @@ const query =
             "admin"
         ];
 
-
         if (
             adminSections.includes(id) &&
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) < 11
+            Number(currentUser?.rankLevel || 0) < 11
         ) {
-
-            return;
+            id = "overview";
         }
 
+        const target = document.getElementById(id);
+        if (!target || !target.classList.contains("dashboard-section")) {
+            id = "overview";
+        }
 
         document
-            .querySelectorAll(
-                ".dashboard-section"
-            )
-            .forEach(
-                section => {
-
-                    section.classList.remove(
-                        "active"
-                    );
-
-                }
-            );
-
+            .querySelectorAll(".dashboard-content > .dashboard-section")
+            .forEach(section => {
+                section.classList.remove("active");
+                section.style.display = "none";
+            });
 
         document
-            .querySelectorAll(
-                ".sidebar-link[data-section]"
-            )
-            .forEach(
-                button => {
+            .querySelectorAll(".sidebar-link[data-section]")
+            .forEach(button => button.classList.remove("active"));
 
-                    button.classList.remove(
-                        "active"
-                    );
-
-                }
-            );
-
+        const activeSection = document.getElementById(id);
+        if (activeSection) {
+            activeSection.classList.add("active");
+            activeSection.style.display = "block";
+        }
 
         document
-            .getElementById(id)
-            ?.classList
-            .add(
-                "active"
-            );
+            .querySelector(`.sidebar-link[data-section="${id}"]`)
+            ?.classList.add("active");
 
-
-        document
-            .querySelector(
-                `[data-section="${id}"]`
-            )
-            ?.classList
-            .add(
-                "active"
-            );
-
-    
+        // păstrăm secțiunea în URL fără reload
+        try {
+            const url = new URL(window.location.href);
+            if (id === "overview") url.searchParams.delete("section");
+            else url.searchParams.set("section", id);
+            history.replaceState(null, "", url.pathname + url.search);
+        } catch (_) {}
 
         /* TEST MANAGEMENT — AUTO LOAD DIN SUPABASE */
-        if (
-            id ===
-            "test-management"
-        ) {
-
+        if (id === "test-management") {
             const questionsContainer =
-                document.getElementById(
-                    "tm-questions-list"
-                );
+                document.getElementById("tm-questions-list");
 
             if (questionsContainer) {
                 questionsContainer.innerHTML =
                     '<div class="empty-state">Se încarcă întrebările salvate...</div>';
             }
 
-            loadTestManagement()
-                .catch(
-                    error => {
-
-                        console.error(
-                            "Test Management Load Error:",
-                            error
-                        );
-
-                        if (questionsContainer) {
-                            questionsContainer.innerHTML = `
-                                <div class="empty-state">
-                                    ${escapeHTML(
-                                        error.message ||
-                                        "Întrebările nu au putut fi încărcate."
-                                    )}
-                                </div>
-                            `;
-                        }
-                    }
-                );
+            loadTestManagement().catch(error => {
+                console.error("Test Management Load Error:", error);
+                if (questionsContainer) {
+                    questionsContainer.innerHTML = `
+                        <div class="empty-state">
+                            ${escapeHTML(error.message || "Întrebările nu au putut fi încărcate.")}
+                        </div>
+                    `;
+                }
+            });
         }
-
     }
 
 
@@ -15536,6 +15502,16 @@ const query =
     }
 
     bindHomeActionCards();
+
+    // Deschide corect secțiunea cerută în URL, ex. /dashboard?section=activities
+    (() => {
+        const requested = new URLSearchParams(window.location.search).get("section");
+        if (requested) {
+            setTimeout(() => openSection(requested), 0);
+        } else {
+            setTimeout(() => openSection("overview"), 0);
+        }
+    })();
 
 
     /* =========================================================
