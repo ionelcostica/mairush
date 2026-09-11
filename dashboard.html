@@ -13690,7 +13690,7 @@ body{background:
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10;
+            ) >= 11;
 
         container.innerHTML =
             events
@@ -13886,7 +13886,7 @@ body{background:
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10
+                    ) < 11
                 ) {
                     return;
                 }
@@ -13915,7 +13915,7 @@ body{background:
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10
+                    ) < 11
                 ) {
                     return;
                 }
@@ -14183,7 +14183,7 @@ body{background:
                 Number(
                     currentUser.rankLevel ||
                     0
-                ) >= 10;
+                ) >= 11;
 
 
             document.body.classList.toggle(
@@ -14328,7 +14328,7 @@ body{background:
         return Number(
             currentUser?.rankLevel ||
             0
-        ) >= 10;
+        ) >= 11;
     }
 
 
@@ -15239,7 +15239,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) < 10
+            ) < 11
         ) {
 
             return;
@@ -15429,7 +15429,7 @@ const query =
                                 Number(
                                     currentUser?.rankLevel ||
                                     0
-                                ) >= 10
+                                ) >= 11
                             ) {
 
                                 await loadAdminLeave();
@@ -15503,7 +15503,7 @@ const query =
 
                     if (
                         (section === "admin" || section === "blacklist") &&
-                        Number(currentUser?.rankLevel || 0) < 10
+                        Number(currentUser?.rankLevel || 0) < 11
                     ) {
                         return;
                     }
@@ -16141,7 +16141,7 @@ const query =
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10
+                    ) < 11
                 ) {
                     return;
                 }
@@ -16285,7 +16285,7 @@ const query =
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10
+                    ) < 11
                 ) {
                     return;
                 }
@@ -16571,7 +16571,7 @@ const query =
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10
+                    ) < 11
                 ) {
                     return;
                 }
@@ -16726,7 +16726,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10 ||
+            ) >= 11 ||
             roles.includes(
                 TESTER_POLIȚIA ROMÂNĂ_ROLE_ID
             )
@@ -16755,7 +16755,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10;
+            ) >= 11;
 
         if (
             [
@@ -16792,7 +16792,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10;
+            ) >= 11;
 
         const testerAccess =
             Boolean(
@@ -16871,7 +16871,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10;
+            ) >= 11;
 
         if (
             isLeadership
@@ -16969,7 +16969,7 @@ const query =
         if (!container) return;
 
         const canEdit =
-            Number(currentUser?.rankLevel || 0) >= 10;
+            Number(currentUser?.rankLevel || 0) >= 11;
 
         if (!(tmData.categories || []).length) {
             container.innerHTML =
@@ -19107,7 +19107,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) < 10
+            ) < 11
         ) {
 
             return;
@@ -19348,7 +19348,7 @@ const query =
                                                                 Number(
                                                                     currentUser?.rankLevel ||
                                                                     0
-                                                                ) >= 10 &&
+                                                                ) >= 11 &&
                                                                 String(
                                                                     member.id
                                                                 ) !==
@@ -20109,7 +20109,7 @@ const query =
                 Number(
                     profile.rankLevel ||
                     0
-                ) >= 10
+                ) >= 11
                     ? "CONDUCERE"
                     : "MEMBRU";
         }
@@ -20385,7 +20385,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10 &&
+            ) >= 11 &&
 
             profile?.id &&
 
@@ -20478,7 +20478,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) < 10
+            ) < 11
         ) {
 
             return;
@@ -20689,7 +20689,7 @@ const query =
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10 ||
+                    ) < 11 ||
                     !viewedProfileData?.id
                 ) {
 
@@ -20985,7 +20985,7 @@ const query =
                     Number(
                         currentUser?.rankLevel ||
                         0
-                    ) < 10 ||
+                    ) < 11 ||
                     !viewedProfileData?.id
                 ) {
 
@@ -21026,7 +21026,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) < 10
+            ) < 11
         ) {
 
             return;
@@ -21288,7 +21288,7 @@ const query =
             Number(
                 currentUser?.rankLevel ||
                 0
-            ) >= 10
+            ) >= 11
         ) {
 
             await loadAdminLeave();
@@ -23566,7 +23566,7 @@ const query =
                         profile.rankLevel ||
                         currentUser?.rankLevel ||
                         0
-                    ) >= 10
+                    ) >= 11
 
                         ? "CONDUCERE"
 
@@ -27138,7 +27138,7 @@ const query =
         .getElementById("admin-delete-all-reports")
         ?.addEventListener("click", async () => {
 
-            if (Number(currentUser?.rankLevel || 0) < 10) {
+            if (Number(currentUser?.rankLevel || 0) < 11) {
                 return;
             }
 
