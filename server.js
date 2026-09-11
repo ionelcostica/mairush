@@ -2890,11 +2890,21 @@ app.get(
             );
         }
 
+        // Servește explicit interfața HTML a dashboardului.
+        // Evită orice răspuns accidental cu un fișier JavaScript/text.
+        res.type("html");
+        res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
         res.sendFile(
-            path.join(
+            path.resolve(
                 __dirname,
                 "dashboard.html"
-            )
+            ),
+            err => {
+                if (err && !res.headersSent) {
+                    console.error("[Dashboard] Nu pot servi dashboard.html:", err);
+                    res.status(err.statusCode || 500).send("Dashboard indisponibil.");
+                }
+            }
         );
     }
 );
